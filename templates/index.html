@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Face Recognition App</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background: #fafafa; }
+    .container { display: flex; gap: 20px; max-width: 1200px; margin: auto; }
+    .left, .right { background: white; border: 1px solid #ddd; border-radius: 10px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); flex: 1; }
+    .right { max-width: 500px; overflow-y: auto; }
+    .gallery { display: flex; flex-wrap: wrap; gap: 10px; border: 1px solid #ccc; border-radius: 8px; background: #fafafa; padding: 5px; max-height: 300px; overflow-y: auto; }
+    .item { width: 110px; text-align: center; background: white; padding: 5px; border: 1px solid #ccc; border-radius: 8px; }
+    img.thumb { width: 100px; height: 100px; object-fit: cover; border-radius: 6px; border: 2px solid #444; }
+    button { margin-top: 5px; font-size: 12px; cursor: pointer; }
+    #addResult, #captureResult { color: green; margin-top: 5px; }
+    .filename { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="left">
+    <h2>🎥 Face Detector</h2>
+    <img src="http://127.0.0.1:8000/video_feed" width="100%" style="max-width: 600px;">
+  </div>
+  <div class="right">
+    <h3>➕ Add Known Face</h3>
+    <form id="uploadForm">
+      <input type="text" name="name" placeholder="Name" required>
+      <input type="file" name="file" accept="image/*" required>
+      <button type="submit">Upload</button>
+    </form>
+    <div id="addResult"></div>
+    <h3>📸 Capture & Add Known Face</h3>
+    <input type="text" id="captureName" placeholder="Enter name">
+    <button onclick="captureAndAddKnown()">📸 Capture & Save</button>
+    <div id="captureResult"></div>
+    <h3>🧑‍🤝‍🧑 Known Faces</h3>
+    <div id="knownFaces" class="gallery"></div>
+    <h3>📸 Captured Faces</h3>
+    <div id="capturedFaces" class="gallery"></div>
+  </div>
+</div>
+<script>
+const api = "http://127.0.0.1:8000";
+
+async function captureAndAddKnown() {
+  const name = document.getElementById('captureName').value.trim();
+  if (!name) { alert("Enter name!"); return; }
+  const res = await fetch(`${api}/capture_known_face`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({name})});
+  const data = await res.json();
+  document.getElementById('captureResult').textContent = data.message;
+  refreshLists();
+}
+async function refreshLists() {
+  const known = await (await fetch(`${api}/list_known_faces`)).json();
+  const captured = await (await fetch(`${api}/list_captured_faces`)).json();
+  const knownDiv = document.getElementById('knownFaces'); knownDiv.innerHTML="";
+  const capturedDiv = document.getElementById('capturedFaces'); capturedDiv.innerHTML="";
+  known.forEach(name => {
+    const div=document.createElement('div'); div.className='item';
+    const img=document.createElement('img'); img.src=`${api}/known_faces/${name}?v=${Date.now()}`; img.className='thumb';
+    const btn=document.createElement('button'); btn.textContent="Delete";
+    btn.onclick=async()=>{await fetch(`${api}/delete_known_face/${name.split('.')[0]}`,{method:'DELETE'});refreshLists();};
+    div.appendChild(img); div.appendChild(document.createElement('div')).textContent=name.split('.')[0]; div.appendChild(btn);
+    knownDiv.appendChild(div);
+  });
+  captured.forEach(name=>{
+    const div=document.createElement('div'); div.className='item';
+    const img=document.createElement('img'); img.src=`${api}/captured_faces/${name}`; img.className='thumb';
+    const btn=document.createElement('button'); btn.textContent="Delete";
+    btn.onclick=async()=>{await fetch(`${api}/delete_captured_face/${name}`,{method:'DELETE'});refreshLists();};
+    div.appendChild(img); const nd=document.createElement('div'); nd.textContent=name; nd.className='filename'; div.appendChild(nd); div.appendChild(btn);
+    capturedDiv.appendChild(div);
+  });
+}
+document.getElementById('uploadForm').onsubmit=async e=>{
+  e.preventDefault();
+  const form=new FormData(e.target);
+  const res=await fetch(`${api}/add_known_face`,{method:'POST',body:form});
+  const data=await res.json();
+  document.getElementById('addResult').textContent=data.message;
+  e.target.reset(); refreshLists();
+};
+refreshLists();
+</script>
+</body>
+</html>
