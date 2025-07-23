@@ -4,83 +4,331 @@
   <title>Face Recognition App</title>
   <style>
     body { font-family: Arial, sans-serif; padding: 20px; background: #fafafa; }
-    .container { display: flex; gap: 20px; max-width: 1200px; margin: auto; }
-    .left, .right { background: white; border: 1px solid #ddd; border-radius: 10px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); flex: 1; }
-    .right { max-width: 500px; overflow-y: auto; }
-    .gallery { display: flex; flex-wrap: wrap; gap: 10px; border: 1px solid #ccc; border-radius: 8px; background: #fafafa; padding: 5px; max-height: 300px; overflow-y: auto; }
-    .item { width: 110px; text-align: center; background: white; padding: 5px; border: 1px solid #ccc; border-radius: 8px; }
+    h2, h3 { margin-top: 20px; }
+    .gallery { display: flex; flex-wrap: wrap; gap: 10px; }
+    .item { width: 120px; text-align: center; background: white; padding: 5px; border: 1px solid #ccc; border-radius: 8px; }
     img.thumb { width: 100px; height: 100px; object-fit: cover; border-radius: 6px; border: 2px solid #444; }
-    button { margin-top: 5px; font-size: 12px; cursor: pointer; }
-    #addResult, #captureResult { color: green; margin-top: 5px; }
-    .filename { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
+    button { margin-top: 5px; font-size: 12px; }
+    #addResult { color: green; margin-top: 5px; }
   </style>
 </head>
 <body>
-<div class="container">
+
+  <div class="container">
   <div class="left">
+    <h3>🎥 Select Camera</h3>
+    <select id="cameraSelect">
+      <option value="0">Default Camera (0)</option>
+      <option value="1">External Camera (1)</option>
+    </select>
+    <button onclick="setCamera()">Set Camera</button>
+    <div id="cameraResult"></div>
+
     <h2>🎥 Face Detector</h2>
-    <img src="https://face-recognition-1-s17v.onrender.com/video_feed" width="100%" style="max-width: 600px;">
+    <img src="http://127.0.0.1:8000/video_feed" width="100%" style="max-width: 600px;">
+
+
+    
   </div>
+
   <div class="right">
+
+
     <h3>➕ Add Known Face</h3>
-    <form id="uploadForm">
-      <input type="text" name="name" placeholder="Name" required>
-      <input type="file" name="file" accept="image/*" required>
-      <button type="submit">Upload</button>
-    </form>
-    <div id="addResult"></div>
+<form id="uploadForm" class="form-horizontal">
+  <div class="form-group">
+    <label>Name:</label>
+    <input type="text" name="name" required>
+  </div>
+  <div class="form-group">
+    <label>Photo:</label>
+    <input type="file" name="file" accept="image/*" required>
+  </div>
+  <button type="submit">Upload</button>
+</form>
+<div id="addResult"></div>
+
+
     <h3>📸 Capture & Add Known Face</h3>
-    <input type="text" id="captureName" placeholder="Enter name">
-    <button onclick="captureAndAddKnown()">📸 Capture & Save</button>
+    Name: <input type="text" id="captureName" placeholder="Enter name">
+    <button onclick="captureAndAddKnown()">📸 Capture & Save as Known Face</button>
     <div id="captureResult"></div>
-    <h3>🧑‍🤝‍🧑 Known Faces</h3>
+
+    <h3>🧑‍🤝‍🧑 Known Faces </h3>
     <div id="knownFaces" class="gallery"></div>
-    <h3>📸 Captured Faces</h3>
+
+    <h3>📸 Captured Faces </h3>
     <div id="capturedFaces" class="gallery"></div>
   </div>
 </div>
+
+
+
+
+<style>
+    .filename {
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+}
+
+  body {
+  font-family: Arial, sans-serif;
+  background: #f4f4f4;
+  margin: 0;
+  padding: 20px;
+}
+
+h2, h3 {
+  margin-top: 20px;
+}
+
+.container {
+  display: flex;
+  gap: 20px;
+  max-width: 1200px;
+  margin: auto;
+}
+
+.left, .right {
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 15px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  flex: 1;
+  min-width: 300px;
+}
+
+.right {
+  max-width: 500px;
+}
+
+.gallery {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  max-height: 300px;
+  overflow-y: auto;
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background: #fafafa;
+}
+
+.item {
+  width: 110px;
+  text-align: center;
+  background: white;
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+
+img.thumb {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 2px solid #444;
+}
+
+.item div {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+button {
+  margin-top: 5px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+#addResult, #captureResult, #cameraResult {
+  color: green;
+  margin-top: 5px;
+}
+
+.item div {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#uploadForm {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-top: 5px;
+}
+
+#uploadForm input[type="text"],
+#uploadForm input[type="file"] {
+  flex: 1 1 auto;
+  min-width: 120px;
+}
+
+#uploadForm button {
+  flex: 0 0 auto;
+  padding: 5px 10px;
+}   
+
+.container {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.left, .right {
+  flex: 1;
+}
+
+.right {
+  max-height: 80vh; /* Adjust as needed */
+  overflow-y: auto;
+  padding-right: 10px;
+  border-left: 2px solid #ccc;
+}
+
+.gallery {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.scrollable {
+  max-height: 60vh; /* adjust for your screen */
+  overflow-y: auto;
+}
+
+.item {
+  width: 120px;
+  text-align: center;
+  background: white;
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+
+</style>
+
 <script>
-const api = "https://face-recognition-1-s17v.onrender.com";
+const api = "http://127.0.0.1:8000";
 
 async function captureAndAddKnown() {
   const name = document.getElementById('captureName').value.trim();
-  if (!name) { alert("Enter name!"); return; }
-  const res = await fetch(`${api}/capture_known_face`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({name})});
-  const data = await res.json();
-  document.getElementById('captureResult').textContent = data.message;
-  refreshLists();
+  if (!name) {
+    alert("Please enter a name!");
+    return;
+  }
+
+  try {
+    const res = await fetch(`${api}/capture_known_face`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name })
+    });
+    const data = await res.json();
+    document.getElementById('captureResult').textContent = data.message;
+    refreshLists();
+  } catch (err) {
+    document.getElementById('captureResult').textContent = "Capture failed";
+  }
 }
+
+
+
+
+
+async function setCamera() {
+  const index = document.getElementById('cameraSelect').value;
+  try {
+    const res = await fetch(`${api}/set_camera?index=${index}`, { method: 'POST' });
+    const data = await res.json();
+    document.getElementById('cameraResult').textContent = data.message;
+  } catch (err) {
+    document.getElementById('cameraResult').textContent = "Failed to set camera";
+  }
+}
+
+
 async function refreshLists() {
-  const known = await (await fetch(`${api}/list_known_faces`)).json();
-  const captured = await (await fetch(`${api}/list_captured_faces`)).json();
-  const knownDiv = document.getElementById('knownFaces'); knownDiv.innerHTML="";
-  const capturedDiv = document.getElementById('capturedFaces'); capturedDiv.innerHTML="";
-  known.forEach(name => {
-    const div=document.createElement('div'); div.className='item';
-    const img=document.createElement('img'); img.src=`${api}/known_faces/${name}?v=${Date.now()}`; img.className='thumb';
-    const btn=document.createElement('button'); btn.textContent="Delete";
-    btn.onclick=async()=>{await fetch(`${api}/delete_known_face/${name.split('.')[0]}`,{method:'DELETE'});refreshLists();};
-    div.appendChild(img); div.appendChild(document.createElement('div')).textContent=name.split('.')[0]; div.appendChild(btn);
-    knownDiv.appendChild(div);
-  });
-  captured.forEach(name=>{
-    const div=document.createElement('div'); div.className='item';
-    const img=document.createElement('img'); img.src=`${api}/captured_faces/${name}`; img.className='thumb';
-    const btn=document.createElement('button'); btn.textContent="Delete";
-    btn.onclick=async()=>{await fetch(`${api}/delete_captured_face/${name}`,{method:'DELETE'});refreshLists();};
-    div.appendChild(img); const nd=document.createElement('div'); nd.textContent=name; nd.className='filename'; div.appendChild(nd); div.appendChild(btn);
-    capturedDiv.appendChild(div);
-  });
+  try {
+    const known = await (await fetch(`${api}/list_known_faces`)).json();
+    const captured = await (await fetch(`${api}/list_captured_faces`)).json();
+
+    const knownDiv = document.getElementById('knownFaces');
+    const capturedDiv = document.getElementById('capturedFaces');
+    knownDiv.innerHTML = ""; capturedDiv.innerHTML = "";
+
+    known.sort();
+    known.forEach(name => {
+      const div = document.createElement('div');
+      div.className = 'item';
+      const img = document.createElement('img');
+      img.src = `${api}/known_faces/${name}?v=${new Date().getTime()}`;
+      img.className = 'thumb';
+      const btn = document.createElement('button');
+      btn.textContent = "Delete";
+      btn.onclick = async () => {
+        await fetch(`${api}/delete_known_face/${name.split('.')[0]}`, { method: 'DELETE' });
+        refreshLists();
+      };
+      div.appendChild(img);
+      div.appendChild(document.createElement('div')).textContent = name.split('.')[0];
+      div.appendChild(btn);
+      knownDiv.appendChild(div);
+    });
+
+    captured.forEach(name => {
+      const div = document.createElement('div');
+      div.className = 'item';
+      const img = document.createElement('img');
+      img.src = `${api}/captured_faces/${name}`;
+      img.className = 'thumb';
+      const btn = document.createElement('button');
+      btn.textContent = "Delete";
+      btn.onclick = async () => {
+        await fetch(`${api}/delete_captured_face/${name}`, { method: 'DELETE' });
+        refreshLists();
+      };
+      div.appendChild(img);
+      const nameDiv = document.createElement('div');
+      nameDiv.textContent = name;
+      nameDiv.title = name; // show full name on hover
+      nameDiv.className = 'filename'; // add class for styling
+      div.appendChild(nameDiv);
+      div.appendChild(btn);
+      capturedDiv.appendChild(div);
+    });
+  } catch (err) {
+    console.error("Error loading lists", err);
+  }
 }
-document.getElementById('uploadForm').onsubmit=async e=>{
+
+document.getElementById('uploadForm').onsubmit = async (e) => {
   e.preventDefault();
-  const form=new FormData(e.target);
-  const res=await fetch(`${api}/add_known_face`,{method:'POST',body:form});
-  const data=await res.json();
-  document.getElementById('addResult').textContent=data.message;
-  e.target.reset(); refreshLists();
+  const form = new FormData(e.target);
+  try {
+    const res = await fetch(`${api}/add_known_face`, { method: 'POST', body: form });
+    const data = await res.json();
+    document.getElementById('addResult').textContent = data.message;
+    e.target.reset();
+    refreshLists();
+  } catch (err) {
+    document.getElementById('addResult').textContent = "Upload failed";
+  }
 };
+
+// Initial load only once
 refreshLists();
 </script>
+
 </body>
 </html>
